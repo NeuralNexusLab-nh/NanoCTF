@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pwn2Own</title>
+  <style>
+    body {
+      background: #0a0a0a;
+      color: #00ffcc;
+      font-family: monospace;
+      text-align: center;
+      padding-top: 100px;
+    }
+    input, button {
+      background: black;
+      color: #00ffcc;
+      border: 1px solid #00ffcc;
+      padding: 10px;
+      margin: 5px;
+    }
+    #output {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Pwn2Own</h1>
+<p>Enter the secret key to unlock the system</p>
+
+<input id="key" placeholder="Enter key">
+<button onclick="check()">Unlock</button>
+
+<p id="output"></p>
+
+<script>
+(function(){
+
+  // Fake flag (decoy)
+  const fakeFlag = "flag{try_harder_this_is_fake}";
+
+  // Real flag (encoded)
+  const encoded = [
+    102,108,97,103,123,112,119,110,50,111,119,110,95,114,101,97,108,95,119,105,110,125
+  ];
+
+  function decode(arr){
+    return arr.map(c => String.fromCharCode(c)).join('');
+  }
+
+  // Hidden validation logic
+  function validate(input){
+    if (!input) return false;
+
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+      hash += input.charCodeAt(i) * (i+1);
+    }
+
+    // Magic number check
+    return hash === 13337 && input.length === 8;
+  }
+
+  // Anti-debug trick
+  setInterval(() => {
+    const before = performance.now();
+    debugger;
+    const after = performance.now();
+    if (after - before > 100) {
+      document.body.innerHTML = "Debugging detected. Access denied.";
+    }
+  }, 2000);
+
+  // Main logic
+  window.check = function(){
+    const input = document.getElementById("key").value;
+
+    if (validate(input)) {
+      document.getElementById("output").innerText = decode(encoded);
+    } else {
+      document.getElementById("output").innerText = "Access Denied";
+    }
+  }
+
+  // Red herring
+  console.log("Flag:", fakeFlag);
+
+})();
+</script>
+
+</body>
+</html>
